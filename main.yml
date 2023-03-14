@@ -29,6 +29,8 @@ jobs:
           fi
   test:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.31.0-focal
     needs: check_is_signed_up
     steps:
       - uses: actions/checkout@v3
@@ -36,13 +38,29 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }} # checkout the PR branch
       - uses: actions/setup-node@v3 # setup node
         with:
-          node-version: 16
+          node-version: 18
       - run: rm -rf tests # remove any user provided test dir
       - uses: actions/checkout@v3 # checkout tests repo
         with:
-          repository: <TEST REPO GOES HERE>
+          repository: developer-job-simulation/react-ecommerce-tests
           path: tests
-      - name: npm install
-        run: cd tests && npm i
+      - name: Install dependencies
+        run: npm ci && cd tests && npm ci
+      - name: start frontend
+        run: npm run dev:frontend &
+      - name: start backend
+        run: npm run dev:backend > /logs.txt &
       - name: Run Tests
         run: node tests/test.js
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs
+          path: /logs.txt
+      - name: Upload screenshot
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: screenshot
+          path: /test.png
