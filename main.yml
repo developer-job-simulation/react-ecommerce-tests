@@ -1,4 +1,4 @@
-name: <REPO NAME GOES HERE> Test Runner by JobSimulator.Dev
+name: React Ecommerce Test Runner by JobSimulator.Dev
 on:
   pull_request_target:
     branches: ["main"]
